@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script type="text/javascript" src="https://livejs.com/live.js"></script>
+    <title>easy-sgr-docs</title>
+    <link
+      type="image/png"
+      sizes="16x16"
+      rel="icon"
+      href="icons8-align-left-16.png"
+    />
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+  </head>
+  <body>
+    <nav id="nav-bar">
+      <h2>Sections</h2>
+      <ul>
+        <li><a class="nav-link" href="#Installation">Installation</a></li>
+        <li><a class="nav-link" href="#Usage">Usage</a></li>
+        <li><a class="nav-link" href="#Macros">Macros</a></li>
+        <li>
+          <a class="nav-link" href="#color_style">Color and Style enums</a>
+        </li>
+        <li><a class="nav-link" href="#easy_sgr">EasySGR trait</a></li>
+        <li><a class="nav-link" href="#SGRString">SGRString struct</a></li>
+        <li><a class="nav-link" href="#SGRWriter">SGRWriter</a></li>
+        <li><a class="nav-link" href="#Features">Features</a></li>
+        <li><a class="nav-link" href="#Partial">Partial Feature</a></li>
+        <li><a class="nav-link" href="#Structure">Structure</a></li>
+        <li><a class="nav-link" href="#TODO">TODO</a></li>
+      </ul>
+    </nav>
+    <main id="documentation">
+      <h1>easy-sgr</h1>
+      <ul id="badges">
+        <li>
+          <a href="https://github.com/4lineclear/easy-sgr/actions"
+            ><img
+              src="https://github.com/4lineclear/easy-sgr/actions/workflows/rust.yml/badge.svg"
+              alt="Build Status"
+          /></a>
+        </li>
+        <li>
+          <a href="https://crates.io/crates/easy-sgr"
+            ><img
+              src="https://img.shields.io/crates/v/easy-sgr"
+              alt="Crates.io"
+          /></a>
+        </li>
+        <li>
+          <a href="https://docs.rs/easy-sgr"
+            ><img src="https://img.shields.io/docsrs/easy-sgr" alt="docs.rs"
+          /></a>
+        </li>
+        <li>
+          <a href="https://github.com/4lineclear/easy-sgr/blob/main/LICENSE"
+            ><img src="https://img.shields.io/crates/l/easy-sgr" alt="License"
+          /></a>
+        </li>
+        <li>
+          <a href="https://codecov.io/gh/4lineclear/easy-sgr"
+            ><img
+              src="https://codecov.io/gh/4lineclear/easy-sgr/branch/main/graph/badge.svg?token=0Q30XAW0PV"
+              alt="Code Coverage"
+          /></a>
+        </li>
+      </ul>
+      <p>
+        An easy-to-use library for adding graphical ANSI codes or
+        <code>SGR</code> escape sequences to your project. Its main strengths
+        are the multitude of methods that are provided, and the lack of
+        dependencies; compile times should be pretty good.<br /><br />
+        This library does not support the usage of non-<code>SGR</code> ANSI
+        escape sequences
+      </p>
+      <h2 id="Installation">Installation</h2>
+      <pre>[dependencies]<br />easy-sgr="0.1.1"</pre>
+      <h2 id="Usage">Usage</h2>
+      <h3 id="Macros"><code>Macros</code></h3>
+      <p>
+        The method I would recommend when regarding ease-of-use is to use the
+        macros provided, through this library or the macro library itself.
+        <br /><br />This can be done without importing any other features of the
+        library as such:
+      </p>
+      <pre>[dependencies]<br>easy-sgr = { version = "0.1.1", features = ["macro-only"] }</pre>
+      <p>
+        Or if you want to still use the other features, replace
+        <code>"macro-only"</code> with <code>"macros"</code>.<br /><br />
+        And its usage is very simple:
+      </p>
+      <pre>
+use easy_sgr::println;
+
+println!("{[italic red]}This should be italic & red!{[]}");</pre
+      >
+      <p>
+        <code>{[]}</code> is interpreted as a reset here.<br /><br />All the
+        other <code>fmt</code> functions are also implemented, see
+        easy-sgr-macros for more.
+      </p>
+      <h3 id="color_style"><code>Color</code> and <code>Style</code> enums</h3>
+      <p>
+        The simplest runtime way to color text, using these two enums allows you
+        to work inline of a string literal when using a macro such as
+        <code>println!</code>, <code>writeln!</code> or <code>format!</code>:
+      </p>
+      <pre>
+use easy_sgr::{Color::*, Style::*};
+
+println!("{Italic}{RedFg}This should be italic & red!{Reset}");</pre
+      >
+      <p>
+        <code>Color</code> and <code>Style</code> are both enums that implement
+        <code>Display</code>: when they are printed a matching
+        <code>SGR</code> code is written.<br /><br />
+        This method is the best when it comes to simplicity, but has drawbacks;
+        using it rewrites the sequence escape <code>\x1b[</code> and the
+        sequence end <code>m</code>
+        repeatedly. In this example this is what would be written:
+      </p>
+      <pre>\x1b[3m\x1b[31mThis should be italic & red!\x1b[0m</pre>
+      <p>
+        This would not be much of an issue for the vast majority of use cases.
+      </p>
+      <h3 id="easy_sgr"><code>EasySGR</code> trait</h3>
+      <p>
+        This is similar to the method above but uses the
+        <code>EasySGR</code> trait. This trait is implemented by anything that
+        implements <code>Into&ltSGRString&gt</code> including Style and Color.
+        Its main purpose is to provide functions for chaining
+        <code>SGR</code> codes.<br /><br />The example above can be achieved
+        using it as such:
+      </p>
+      <pre>
+use easy_sgr::{ Color::*, EasySGR, Style::*};
+
+let sgr = Italic.color(RedFg);
+
+println!("{sgr}This should be italic & red!{Reset}");</pre
+      >
+      <p>Now the output would look something like this:</p>
+      <pre>\x1b[31;3mThis should be italic & red!\x1b[0m</pre>
+      <p>
+        Instead of a rewriting the entire sequence, the separator character
+        <code>;</code> is used instead.<br /><br />
+        Doing this avoids the issue of rewriting the Escape and End sequences,
+        though is more expensive to use as it allocates an
+        <code>SGRString</code>.
+      </p>
+      <h3 id="SGRString"><code>SGRString</code> struct</h3>
+      <p>
+        <code>SGRString</code> is the type returned by all
+        <code>EasySGR</code> functions, it encapsulates all possible
+        <code>SGR</code> sequences. You can use it to reproduce the previous
+        examples as such:
+      </p>
+      <pre>
+use easy_sgr::{Color::*, EasySGR, Style::*};
+
+let text = "This should be italic & red!"
+    .to_sgr()
+    .style(Italic)
+    .color(RedFg);
+println!("{text}");</pre
+      >
+      <p>
+        You can forgo <code>.to_sgr()</code> as <code>.style(..)</code>,
+        <code>.color(..)</code> and all other EasySGR functions can be directly
+        called on the string literal and other types that implement it.<br /><br />The
+        method above still uses the <code>EasySGR</code>
+        trait, you can go without it like here:
+      </p>
+      <pre>
+use easy_sgr::{ColorKind, SGRString, StyleKind};
+
+let mut text = SGRString::from("This should be italic & red!");
+text.italic = StyleKind::Place;
+text.foreground = ColorKind::Red;
+
+println!("{text}")</pre
+      >
+      <h3 id="SGRWriter"><code>SGRWriter</code> struct</h3>
+      <p>
+        The writer can also be used directly, instead of using the above
+        methods:
+      </p>
+      <pre>
+use std::io::{stdout, Write};
+use easy_sgr::{Color::*, EasySGR, SGRWriter, Style::*};
+
+let mut writer = SGRWriter::from(stdout());
+writer.sgr(&Italic.color(RedFg)).unwrap();
+writer.write_inner("This should be italic & red!").unwrap();
+writer.sgr(&Reset).unwrap();</pre
+      >
+      <p>or, when writing to a String</p>
+      <pre>
+use easy_sgr::{Color::*, EasySGR, SGRWriter, Style::*};
+
+let stylized_string = {
+    let mut writer = SGRWriter::from(String::new());
+    writer.sgr(&Italic.color(RedFg)).unwrap();
+    writer.write_inner("This should be italic & red!").unwrap();
+    writer.sgr(&Reset).unwrap();
+    writer.internal()
+};</pre
+      >
+      <h2 id="Features">Features</h2>
+      <h3 id="Partial">Partial</h3>
+      <p>
+        This feature changes the way that the discrete module works, enabling it
+        causes it's types to not write the sequence escape and end.<br /><br />
+        This means to achieve the same affect as above you must do this:
+      </p>
+      <pre>
+use easy_sgr::{Color::*, Seq::*, Style::*};
+
+println!("{Esc}{Italic};{RedFg}{End}This should be italic & red!{Esc}{Reset}{End}");</pre
+      >
+      <p>resulting in the string:</p>
+      <pre>\x1b[3;31mThis should be italic & red!\x1b[0m</pre>
+      <p>
+        This feature exchanges ease of use for verbosity, resulting in more
+        control.
+      </p>
+      <h2 id="Structure">Structure</h2>
+      <p>easy-sgr is split into three modules:</p>
+      <ul>
+        <li>
+          discrete
+          <ul>
+            <li>contains types that can be used inline of a string literal</li>
+            <li>
+              The types, Seq, Color & Style are all able to function
+              independently
+            </li>
+            <li>They all implement the DiscreteSGR type to aid in this</li>
+            <li>The DiscreteSGR types can all work with an SGRString</li>
+          </ul>
+        </li>
+        <li>graphics</li>
+        <ul>
+          <li>Centerpiece is SGRString & EasySGR</li>
+          <li>SGRString is a String with the ability to write SGR codes</li>
+          <li>
+            EasySGR is a trait for chaining SGR codes to create a SGRString
+          </li>
+          <li>
+            EasySGR is blanket implemented by everything that implements
+            Into&ltSGRString&gt
+          </li>
+          <li>
+            This includes:
+            <ul>
+              <li>SGRString</li>
+              <li>Color</li>
+              <li>Style</li>
+              <li>&str</li>
+              <li>String</li>
+              <li>&String</li>
+            </ul>
+          </li>
+        </ul>
+        <li>
+          writing
+          <ul>
+            <li>Implements SGRWriter & SGRBuilder</li>
+            <li>Used by other modules to do writing</li>
+          </ul>
+        </li>
+      </ul>
+      <p>
+        Though no modules really will be seen in usage, as all the types they
+        contain are reexported.
+      </p>
+      <h2 id="TODO">TODO for 1.0.0 release</h2>
+      <ul id="check-boxes">
+        <li>
+          <input type="checkbox" disabled="disabled" />
+          Add examples to docs
+          <ul>
+            <li>
+              <input type="checkbox" disabled="disabled" checked />discrete
+            </li>
+            <li><input type="checkbox" disabled="disabled" />graphics</li>
+            <li><input type="checkbox" disabled="disabled" />writing</li>
+          </ul>
+        </li>
+        <li>
+          <input type="checkbox" disabled="disabled" checked />Macros
+          (east-sgr-macros) (0.1.0)
+        </li>
+        <li>
+          <input type="checkbox" disabled="disabled" />
+          Add parser?
+          <ul>
+            <li>
+              <input type="checkbox" disabled="disabled" />Add parsing from ansi
+              codes
+            </li>
+            <li>
+              <input type="checkbox" disabled="disabled" />Add parsing for
+              SGRString
+            </li>
+          </ul>
+        </li>
+        <li>
+          <input type="checkbox" disabled="disabled" />EasySGR implementation
+          that doesn't allocate an SGRString
+        </li>
+      </ul>
+    </main>
+    <a href="#top" id="to-top-button">Back to Top &#8593;</a>
+  </body>
+</html>
