@@ -11,8 +11,10 @@
       href="icons8-align-left-16.png"
     />
     <link rel="stylesheet" type="text/css" href="styles.css" />
+    <link href="prism.css" rel="stylesheet" />
   </head>
   <body>
+    <script src="prism.js"></script>
     <nav id="nav-bar">
       <h2>Sections</h2>
       <ul>
@@ -75,7 +77,8 @@
         escape sequences
       </p>
       <h2 id="Installation">Installation</h2>
-      <pre>[dependencies]<br />easy-sgr="0.1.1"</pre>
+      <pre><code class="lang-toml">[dependencies]
+easy-sgr="0.1.1"</code></pre>
       <h2 id="Usage">Usage</h2>
       <h3 id="Macros"><code>Macros</code></h3>
       <p>
@@ -84,17 +87,16 @@
         <br /><br />This can be done without importing any other features of the
         library as such:
       </p>
-      <pre>[dependencies]<br>easy-sgr = { version = "0.1.1", features = ["macro-only"] }</pre>
+      <pre><code class="lang-toml">[dependencies]
+easy-sgr = { version = "0.1.1", features = ["macro-only"] }</code></pre>
       <p>
         Or if you want to still use the other features, replace
         <code>"macro-only"</code> with <code>"macros"</code>.<br /><br />
         And its usage is very simple:
       </p>
-      <pre>
-use easy_sgr::println;
+      <pre><code class="lang-rust">use easy_sgr::println;
 
-println!("{[italic red]}This should be italic & red!{[]}");</pre
-      >
+println!("{[italic red]}This should be italic & red!{[]}");</code></pre>
       <p>
         <code>{[]}</code> is interpreted as a reset here.<br /><br />All the
         other <code>fmt</code> functions are also implemented, see
@@ -106,11 +108,9 @@ println!("{[italic red]}This should be italic & red!{[]}");</pre
         to work inline of a string literal when using a macro such as
         <code>println!</code>, <code>writeln!</code> or <code>format!</code>:
       </p>
-      <pre>
-use easy_sgr::{Color::*, Style::*};
+      <pre><code class="lang-rust">use easy_sgr::{Color::*, Style::*};
 
-println!("{Italic}{RedFg}This should be italic & red!{Reset}");</pre
-      >
+println!("{Italic}{RedFg}This should be italic & red!{Reset}");</code></pre>
       <p>
         <code>Color</code> and <code>Style</code> are both enums that implement
         <code>Display</code>: when they are printed a matching
@@ -120,7 +120,7 @@ println!("{Italic}{RedFg}This should be italic & red!{Reset}");</pre
         sequence end <code>m</code>
         repeatedly. In this example this is what would be written:
       </p>
-      <pre>\x1b[3m\x1b[31mThis should be italic & red!\x1b[0m</pre>
+      <pre><code class="lang-plain">\x1b[3m\x1b[31mThis should be italic & red!\x1b[0m</code></pre>
       <p>
         This would not be much of an issue for the vast majority of use cases.
       </p>
@@ -133,15 +133,13 @@ println!("{Italic}{RedFg}This should be italic & red!{Reset}");</pre
         <code>SGR</code> codes.<br /><br />The example above can be achieved
         using it as such:
       </p>
-      <pre>
-use easy_sgr::{ Color::*, EasySGR, Style::*};
+      <pre><code class="lang-rust">use easy_sgr::{ Color::*, EasySGR, Style::*};
 
 let sgr = Italic.color(RedFg);
 
-println!("{sgr}This should be italic & red!{Reset}");</pre
-      >
+println!("{sgr}This should be italic & red!{Reset}");</code></pre>
       <p>Now the output would look something like this:</p>
-      <pre>\x1b[31;3mThis should be italic & red!\x1b[0m</pre>
+      <pre><code class="lang-plain">\x1b[31;3mThis should be italic & red!\x1b[0m</code></pre>
       <p>
         Instead of a rewriting the entire sequence, the separator character
         <code>;</code> is used instead.<br /><br />
@@ -156,15 +154,13 @@ println!("{sgr}This should be italic & red!{Reset}");</pre
         <code>SGR</code> sequences. You can use it to reproduce the previous
         examples as such:
       </p>
-      <pre>
-use easy_sgr::{Color::*, EasySGR, Style::*};
+      <pre><code class="lang-rust">use easy_sgr::{Color::*, EasySGR, Style::*};
 
 let text = "This should be italic & red!"
     .to_sgr()
     .style(Italic)
     .color(RedFg);
-println!("{text}");</pre
-      >
+println!("{text}");</code></pre>
       <p>
         You can forgo <code>.to_sgr()</code> as <code>.style(..)</code>,
         <code>.color(..)</code> and all other EasySGR functions can be directly
@@ -172,32 +168,27 @@ println!("{text}");</pre
         method above still uses the <code>EasySGR</code>
         trait, you can go without it like here:
       </p>
-      <pre>
-use easy_sgr::{ColorKind, SGRString, StyleKind};
+      <pre><code class="lang-rust">use easy_sgr::{ColorKind, SGRString, StyleKind};
 
 let mut text = SGRString::from("This should be italic & red!");
 text.italic = StyleKind::Place;
 text.foreground = ColorKind::Red;
 
-println!("{text}")</pre
-      >
+println!("{text}")</code></pre>
       <h3 id="SGRWriter"><code>SGRWriter</code> struct</h3>
       <p>
         The writer can also be used directly, instead of using the above
         methods:
       </p>
-      <pre>
-use std::io::{stdout, Write};
+      <pre><code class="lang-rust">use std::io::{stdout, Write};
 use easy_sgr::{Color::*, EasySGR, SGRWriter, Style::*};
 
 let mut writer = SGRWriter::from(stdout());
 writer.sgr(&Italic.color(RedFg)).unwrap();
 writer.write_inner("This should be italic & red!").unwrap();
-writer.sgr(&Reset).unwrap();</pre
-      >
+writer.sgr(&Reset).unwrap();</code></pre>
       <p>or, when writing to a String</p>
-      <pre>
-use easy_sgr::{Color::*, EasySGR, SGRWriter, Style::*};
+      <pre><code class="lang-rust">use easy_sgr::{Color::*, EasySGR, SGRWriter, Style::*};
 
 let stylized_string = {
     let mut writer = SGRWriter::from(String::new());
@@ -205,8 +196,7 @@ let stylized_string = {
     writer.write_inner("This should be italic & red!").unwrap();
     writer.sgr(&Reset).unwrap();
     writer.internal()
-};</pre
-      >
+};</code></pre>
       <h2 id="Features">Features</h2>
       <h3 id="Partial">Partial</h3>
       <p>
@@ -214,13 +204,11 @@ let stylized_string = {
         causes it's types to not write the sequence escape and end.<br /><br />
         This means to achieve the same affect as above you must do this:
       </p>
-      <pre>
-use easy_sgr::{Color::*, Seq::*, Style::*};
+      <pre><code class="lang-rust">use easy_sgr::{Color::*, Seq::*, Style::*};
 
-println!("{Esc}{Italic};{RedFg}{End}This should be italic & red!{Esc}{Reset}{End}");</pre
-      >
+println!("{Esc}{Italic};{RedFg}{End}This should be italic & red!{Esc}{Reset}{End}");</code></pre>
       <p>resulting in the string:</p>
-      <pre>\x1b[3;31mThis should be italic & red!\x1b[0m</pre>
+      <pre><code class="lang-plain">\x1b[3;31mThis should be italic & red!\x1b[0m</code></pre>
       <p>
         This feature exchanges ease of use for verbosity, resulting in more
         control.
