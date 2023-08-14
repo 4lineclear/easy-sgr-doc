@@ -1,15 +1,17 @@
-use actix_files::Files;
-use actix_web::web::ServiceConfig;
-use shuttle_actix_web::ShuttleActixWeb;
+use std::path::PathBuf;
 
+use axum::{response::Html, routing::get, Router};
+use tower_http::services::ServeDir;
 #[shuttle_runtime::main]
-async fn actix_web() -> ShuttleActixWeb<impl FnOnce(&mut ServiceConfig) + Send + Clone + 'static> {
-    let config = move |cfg: &mut ServiceConfig| {
-        cfg.service(Files::new("/js", "static/js/").show_files_listing())
-            .service(Files::new("/img", "static/img/").show_files_listing())
-            .service(Files::new("/css", "static/css/").show_files_listing())
-            .service(Files::new("/", "./static/html").index_file("index.html"));
-    };
+async fn actix_web(
+    #[shuttle_static_folder::StaticFolder] static_folder: PathBuf,
+) -> shuttle_axum::ShuttleAxum {
+    let router = Router::new()
+        .route(
+            "/",
+            get(|| async { Html(include_str!("../static/html/index.html")) }),
+        )
+        .nest_service("/assets", ServeDir::new(static_folder));
 
-    Ok(config.into())
+    Ok(router.into())
 }
