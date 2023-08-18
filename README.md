@@ -11,4 +11,6 @@ Based off of:
 Made with vanilla HTML &amp; CSS, using [Prism](https://prismjs.com/) for code coloring and
 [actix](https://actix.rs/) for the backend.
 
+You can find this website hosted [here](https://easy-sgr-doc.shuttleapp.rs/).
+
 [easy-sgr]: https://github.com/4lineclear/easy-sgr/tree/main
